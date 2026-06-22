@@ -1062,9 +1062,7 @@ class GeminiSRTTranslator:
             "timestamp": datetime.now().isoformat(),
             "mode": mode,
             "model": self.model_name,
-            "input_file": self.input_file,
             "output_file": self.output_file,
-            "target_language": self.target_language if mode == "translate" else None,
             "duration_seconds": round(time.time() - self._start_time, 2),
             "tokens": {
                 "prompt": self._report_prompt_tokens,
@@ -1073,6 +1071,12 @@ class GeminiSRTTranslator:
                 "total": self._report_total_tokens,
             },
         }
+        if self.input_file:
+            report["input_file"] = self.input_file
+        if self.audio_file:
+            report["audio_file"] = self.audio_file
+        if mode == "translate" and self.target_language:
+            report["target_language"] = self.target_language
         cost = self._calculate_cost()
         if cost:
             report["cost"] = cost

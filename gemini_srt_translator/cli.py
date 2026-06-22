@@ -305,6 +305,8 @@ def cmd_transcribe(args) -> None:
         gst.streaming = not args.no_streaming
     if args.no_thinking:
         gst.thinking = not args.no_thinking
+    if args.skip_upgrade:
+        gst.skip_upgrade = args.skip_upgrade
     if args.no_colors:
         gst.use_colors = not args.no_colors
     if args.progress_log:
@@ -466,6 +468,7 @@ Examples:
     )
     transcribe_parser.add_argument("--token-stats", action="store_true", default=None, help="Show token usage")
     transcribe_parser.add_argument("--token-report", default=None, help="Write per-run token usage JSON to this path")
+    transcribe_parser.add_argument("--skip-upgrade", action="store_true", default=None, help="Skip upgrade check")
     transcribe_parser.add_argument("--temperature", type=float, help="Temperature (0.0-2.0)")
     transcribe_parser.add_argument("--top-p", type=float, help="Top P (0.0-1.0)")
     transcribe_parser.add_argument("--top-k", type=int, help="Top K (>=0)")
