@@ -148,3 +148,6 @@ cython_debug/
 
 # Example SRT files for testing
 tests/example_srt/
+
+# Playwright files
+.playwright-mcp/
