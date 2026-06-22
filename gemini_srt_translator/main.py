@@ -1029,6 +1029,32 @@ class GeminiSRTTranslator:
         if total_tokens is not None:
             self._report_total_tokens += total_tokens
 
+    def _calculate_cost(self) -> dict | None:
+        pricing_path = os.path.join(os.path.dirname(__file__), "pricing.json")
+        try:
+            with open(pricing_path, "r", encoding="utf-8") as f:
+                pricing = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None
+
+        tier = self.service_tier or "standard"
+        model_pricing = pricing.get("models", {}).get(self.model_name)
+        if not model_pricing:
+            return None
+
+        rates = model_pricing.get(tier) or model_pricing.get("standard")
+        if not rates:
+            return None
+
+        input_cost = self._report_prompt_tokens / 1_000_000 * rates["input"]
+        output_cost = (self._report_thoughts_tokens + self._report_output_tokens) / 1_000_000 * rates["output"]
+        return {
+            "input": round(input_cost, 6),
+            "output": round(output_cost, 6),
+            "total": round(input_cost + output_cost, 6),
+            "tier": tier,
+        }
+
     def _write_token_report(self, mode: str) -> None:
         if not self.token_report:
             return
@@ -1047,6 +1073,9 @@ class GeminiSRTTranslator:
                 "total": self._report_total_tokens,
             },
         }
+        cost = self._calculate_cost()
+        if cost:
+            report["cost"] = cost
         try:
             report_dir = os.path.dirname(self.token_report)
             if report_dir and not os.path.exists(report_dir):
